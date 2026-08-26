@@ -1,68 +1,63 @@
 package com.launchcode.practice_github_pilot_group.controller;
 
 import com.launchcode.practice_github_pilot_group.model.Student;
-import com.launchcode.practice_github_pilot_group.model.Teacher;
 import com.launchcode.practice_github_pilot_group.repository.StudentRepository;
-import com.launchcode.practice_github_pilot_group.repository.TeacherRepository;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/students")
+@RequestMapping("/students")
 public class StudentController {
 
     @Autowired
     private StudentRepository studentRepository;
 
-    @Autowired
-    private TeacherRepository teacherRepository;
-
     @GetMapping
-    public List<Student> list() {
+    public List<Student> getAllStudents() {
         return studentRepository.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Student> get(@PathVariable Long id) {
+    public ResponseEntity<Student> getStudentById(@PathVariable Long id) {
         return studentRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<Student> create(@RequestBody Student student) {
-        // if a teacher id is provided on the student.teacher.id, attempt to set teacher
-        if (student.getTeacher() != null && student.getTeacher().getId() != null) {
-            Long teacherId = student.getTeacher().getId();
-            Teacher teacher = teacherRepository.findById(teacherId).orElse(null);
-            student.setTeacher(teacher);
-        }
+    public ResponseEntity<Student> createStudent(@RequestBody Student student) {
         Student saved = studentRepository.save(student);
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.status(201).body(saved);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Student> update(@PathVariable Long id, @RequestBody Student updated) {
+    public ResponseEntity<Student> updateStudent(@PathVariable Long id, @RequestBody Student payload) {
         return studentRepository.findById(id).map(existing -> {
-            existing.setName(updated.getName());
-            existing.setEmail(updated.getEmail());
-            if (updated.getTeacher() != null && updated.getTeacher().getId() != null) {
-                Teacher teacher = teacherRepository.findById(updated.getTeacher().getId()).orElse(null);
-                existing.setTeacher(teacher);
+            existing.setFirstName(payload.getFirstName());
+            existing.setLastName(payload.getLastName());
+            existing.setEmail(payload.getEmail());
+            if (payload.getTeacher() != null) {
+                existing.setTeacher(payload.getTeacher());
             }
-            studentRepository.save(existing);
-            return ResponseEntity.ok(existing);
+            Student updated = studentRepository.save(existing);
+            return ResponseEntity.ok(updated);
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        return studentRepository.findById(id).map(s -> {
-            studentRepository.delete(s);
-            return ResponseEntity.noContent().<Void>build();
+    public ResponseEntity<Object> deleteStudent(@PathVariable Long id) {
+        return studentRepository.findById(id).map(student -> {
+            studentRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
