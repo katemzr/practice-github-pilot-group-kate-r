@@ -51,7 +51,7 @@ public class TeacherController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTeacher(@PathVariable Long id) {
+    public ResponseEntity<Object> deleteTeacher(@PathVariable Long id) {
         return teacherRepository.findById(id).map(t -> {
             teacherRepository.deleteById(id);
             return ResponseEntity.noContent().build();
