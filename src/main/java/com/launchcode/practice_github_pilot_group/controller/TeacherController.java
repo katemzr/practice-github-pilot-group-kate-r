@@ -2,11 +2,17 @@ package com.launchcode.practice_github_pilot_group.controller;
 
 import com.launchcode.practice_github_pilot_group.model.Teacher;
 import com.launchcode.practice_github_pilot_group.repository.TeacherRepository;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/teachers")
@@ -48,7 +54,7 @@ public class TeacherController {
     public ResponseEntity<Void> deleteTeacher(@PathVariable Long id) {
         return teacherRepository.findById(id).map(t -> {
             teacherRepository.deleteById(id);
-            return ResponseEntity.noContent().<Void>build();
+            return ResponseEntity.noContent().build();
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
