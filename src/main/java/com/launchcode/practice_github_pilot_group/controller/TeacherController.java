@@ -9,43 +9,45 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/teachers")
+@RequestMapping("/teachers")
 public class TeacherController {
 
     @Autowired
     private TeacherRepository teacherRepository;
 
     @GetMapping
-    public List<Teacher> list() {
+    public List<Teacher> getAllTeachers() {
         return teacherRepository.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Teacher> get(@PathVariable Long id) {
+    public ResponseEntity<Teacher> getTeacherById(@PathVariable Long id) {
         return teacherRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public Teacher create(@RequestBody Teacher teacher) {
-        return teacherRepository.save(teacher);
+    public ResponseEntity<Teacher> createTeacher(@RequestBody Teacher teacher) {
+        Teacher saved = teacherRepository.save(teacher);
+        return ResponseEntity.status(201).body(saved);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Teacher> update(@PathVariable Long id, @RequestBody Teacher updated) {
+    public ResponseEntity<Teacher> updateTeacher(@PathVariable Long id, @RequestBody Teacher payload) {
         return teacherRepository.findById(id).map(existing -> {
-            existing.setName(updated.getName());
-            existing.setEmail(updated.getEmail());
-            teacherRepository.save(existing);
-            return ResponseEntity.ok(existing);
+            existing.setFirstName(payload.getFirstName());
+            existing.setLastName(payload.getLastName());
+            existing.setEmail(payload.getEmail());
+            Teacher updated = teacherRepository.save(existing);
+            return ResponseEntity.ok(updated);
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteTeacher(@PathVariable Long id) {
         return teacherRepository.findById(id).map(t -> {
-            teacherRepository.delete(t);
+            teacherRepository.deleteById(id);
             return ResponseEntity.noContent().<Void>build();
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }

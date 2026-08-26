@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/students")
+@RequestMapping("/students")
 public class StudentController {
 
     @Autowired
@@ -41,13 +41,14 @@ public class StudentController {
             student.setTeacher(teacher);
         }
         Student saved = studentRepository.save(student);
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.status(201).body(saved);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Student> update(@PathVariable Long id, @RequestBody Student updated) {
         return studentRepository.findById(id).map(existing -> {
-            existing.setName(updated.getName());
+            existing.setFirstName(updated.getFirstName());
+            existing.setLastName(updated.getLastName());
             existing.setEmail(updated.getEmail());
             if (updated.getTeacher() != null && updated.getTeacher().getId() != null) {
                 Teacher teacher = teacherRepository.findById(updated.getTeacher().getId()).orElse(null);
